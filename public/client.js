@@ -6,6 +6,10 @@ let myRole = null;        // 'host' | 'participant'
 let watchId = null;       // geolocation watch handle
 let lastAccuracy = null;
 
+function markerHsl(colorIndex) {
+  return `hsl(${(colorIndex * 67 + 195) % 360}, 100%, 65%)`;
+}
+
 // ── VIEW MANAGEMENT ──────────────────────────────────────────────
 function showView(id) {
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
@@ -54,6 +58,16 @@ socket.on('error_msg', (msg) => {
 socket.on('session_ended', () => {
   showView('view-ended');
   stopGeolocation();
+});
+
+socket.on('your_marker', ({ colorIndex }) => {
+  if (myRole !== 'participant') return;
+  const swatch = document.getElementById('participant-color-swatch');
+  const label = document.getElementById('participant-color-label');
+  const row = document.getElementById('participant-marker-row');
+  if (swatch) swatch.style.background = markerHsl(colorIndex);
+  if (label) label.textContent = 'your dot on the host map';
+  if (row) row.hidden = false;
 });
 
 // ── GEOLOCATION ──────────────────────────────────────────────────
@@ -239,10 +253,11 @@ function drawMap(participants, ratio) {
     );
     const scale = (cx * 0.8) / maxR;
 
-    // Draw participant dots
+    // Draw participant dots (colorIndex matches participant swatches)
     participants.forEach((p, i) => {
       const sx = cx + p.dx * scale;
       const sy = cy - p.dy * scale; // flip y (screen coords)
+      const ci = p.colorIndex != null ? p.colorIndex : i;
 
       // Accuracy circle (faint)
       if (p.accuracy && p.accuracy * scale > 4) {
@@ -256,7 +271,7 @@ function drawMap(participants, ratio) {
       // Dot
       ctx.beginPath();
       ctx.arc(sx, sy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = `hsl(${(i * 67 + 195) % 360}, 100%, 65%)`;
+      ctx.fillStyle = markerHsl(ci);
       ctx.fill();
     });
   }

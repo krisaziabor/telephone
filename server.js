@@ -93,6 +93,16 @@ function scramble(text, ratio) {
     .join('');
 }
 
+function sortedParticipantIds() {
+  return Object.keys(clients).filter((id) => id !== host).sort();
+}
+
+function emitParticipantMarkers() {
+  sortedParticipantIds().forEach((id, idx) => {
+    io.to(id).emit('your_marker', { colorIndex: idx });
+  });
+}
+
 // --- Compute scramble ratio and broadcast ---
 function broadcast() {
   if (!message || !host || !clients[host]) return;
@@ -155,6 +165,7 @@ function broadcast() {
 
   // Emit position map to host only (relative to host position, in meters)
   if (clients[host] && host) {
+    const idOrder = sortedParticipantIds();
     const relativePositions = Object.entries(clients)
       .filter(([id, c]) => id !== host && c.lat && c.lng)
       .map(([id, c]) => {
@@ -163,7 +174,8 @@ function broadcast() {
         const toRad = (d) => (d * Math.PI) / 180;
         const dy = R * toRad(c.lat - hostClient.lat);
         const dx = R * Math.cos(toRad(hostClient.lat)) * toRad(c.lng - hostClient.lng);
-        return { dx, dy, accuracy: c.accuracy };
+        const colorIndex = idOrder.indexOf(id);
+        return { dx, dy, accuracy: c.accuracy, colorIndex };
       });
 
     io.to(host).emit('position_map', {
@@ -196,6 +208,7 @@ io.on('connection', (socket) => {
       console.log(`[PARTICIPANT] ${socket.id}`);
     }
     broadcast();
+    emitParticipantMarkers();
   });
 
   // Host submits message
@@ -234,6 +247,7 @@ io.on('connection', (socket) => {
       console.log('[SESSION ENDED] Host left.');
     } else {
       broadcast();
+      emitParticipantMarkers();
     }
   });
 });
