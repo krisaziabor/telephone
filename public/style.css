@@ -1,0 +1,260 @@
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── PALETTE ── */
+:root {
+  --bg:      #0100FF;
+  --body:    #FEAE00;
+  --pink:    #ff2d78;
+  --blue:    #0af;
+  --green:   #a6ff00;
+  --violet:  #7b2fff;
+  --orange:  #ff6600;
+  --white:   #f2f2f2;
+  --black:   #0a0a0a;
+  --mono: 'Space Mono', 'Courier New', monospace;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--body);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+
+/* ── VIEWS ── */
+.view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+.view.active { display: flex; }
+
+/* ── ENTRY ── */
+#view-entry {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.entry-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.title {
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--body);
+  line-height: 1;
+}
+.subtitle {
+  font-size: clamp(0.75rem, 2vw, 1.1rem);
+  color: var(--pink);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.role-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.role-btn {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: none;
+  border: 2px solid var(--body);
+  color: var(--body);
+  padding: 0.6rem 2rem;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.role-btn:hover {
+  background: var(--body);
+  color: var(--bg);
+}
+
+/* ── HOST SETUP ── */
+#view-host-setup {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.setup-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(90vw, 520px);
+}
+.setup-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--green);
+}
+.message-input {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  background: none;
+  border: 2px solid var(--body);
+  color: var(--body);
+  padding: 0.75rem;
+  resize: vertical;
+  line-height: 1.5;
+  outline: none;
+}
+.message-input::placeholder { color: rgba(254, 174, 0, 0.45); }
+.message-input:focus { border-color: var(--green); }
+.start-btn {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: var(--green);
+  border: none;
+  color: var(--black);
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.1s;
+}
+.start-btn:hover { opacity: 0.85; }
+
+/* ── HOST DISPLAY ── */
+#view-host-display {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--bg);
+  padding: 2rem;
+}
+.host-display-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: min(90vw, 480px);
+}
+.host-stats {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+}
+.stat { color: var(--green); }
+.host-message-preview {
+  font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+  line-height: 1.5;
+  color: var(--body);
+  word-break: break-all;
+  text-align: center;
+  min-height: 3em;
+  width: 100%;
+  opacity: 0.7;
+}
+.position-map {
+  border: 1px solid rgba(254, 174, 0, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+}
+.map-label {
+  font-size: 0.65rem;
+  color: rgba(254, 174, 0, 0.5);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* ── PARTICIPANT VIEW ── */
+#view-participant {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  transition: background-color 0.6s ease;
+}
+.participant-message {
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  padding: 5vw;
+  word-break: break-word;
+  color: var(--body);
+  transition: color 0.4s;
+  max-width: 100%;
+  width: 100%;
+  /* Character spans will be wrapped for individual effects */
+}
+
+/* Each character wrapped in a span when scramble is high */
+.participant-message .char {
+  display: inline-block;
+}
+.participant-message.glitching .char {
+  animation: char-jitter 0.12s infinite;
+  animation-delay: calc(var(--i) * 0.03s);
+}
+@keyframes char-jitter {
+  0%   { transform: rotate(0deg) translateY(0); opacity: 1; }
+  25%  { transform: rotate(calc(var(--i) * 0.4deg - 1.5deg)) translateY(-1px); opacity: 0.85; }
+  75%  { transform: rotate(calc(var(--i) * -0.3deg + 1deg)) translateY(1px); opacity: 0.9; }
+  100% { transform: rotate(0deg) translateY(0); opacity: 1; }
+}
+
+.geo-status {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: rgba(254, 174, 0, 0.45);
+  text-align: center;
+  max-width: 80vw;
+}
+.accuracy-display {
+  position: fixed;
+  bottom: 3.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--orange);
+  text-align: center;
+}
+
+/* ── ENDED / ERROR ── */
+#view-ended, #view-error {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.ended-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.ended-text {
+  font-size: clamp(2rem, 8vw, 5rem);
+  font-weight: 700;
+  color: var(--pink);
+  letter-spacing: -0.02em;
+}
+.ended-sub {
+  font-size: 0.85rem;
+  color: rgba(254, 174, 0, 0.55);
+  letter-spacing: 0.1em;
+}
+
+/* ── SCRAMBLE BACKGROUND SHIFT ── */
+/* Applied via JS based on ratio */
+.bg-calm    { background-color: #0100FF; }
+.bg-low     { background-color: #0c00c2; }
+.bg-mid     { background-color: #120078; }
+.bg-high    { background-color: #180040; }
+.bg-chaos   { background-color: #1e0018; }

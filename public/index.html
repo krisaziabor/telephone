@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TELEPHONE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ENTRY VIEW: choose role -->
+  <div id="view-entry" class="view active">
+    <div class="entry-inner">
+      <h1 class="title">TELEPHONE</h1>
+      <p class="subtitle">proximity ↔ clarity</p>
+      <div class="role-buttons">
+        <button id="btn-host" class="role-btn">HOST</button>
+        <button id="btn-join" class="role-btn">JOIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST SETUP VIEW: enter message -->
+  <div id="view-host-setup" class="view">
+    <div class="setup-inner">
+      <label for="message-input" class="setup-label">SECRET MESSAGE</label>
+      <textarea id="message-input" class="message-input" placeholder="enter the message..." rows="4" maxlength="500"></textarea>
+      <button id="btn-start" class="start-btn">START SESSION</button>
+    </div>
+  </div>
+
+  <!-- HOST DISPLAY VIEW: stats + position map -->
+  <div id="view-host-display" class="view">
+    <div class="host-display-inner">
+      <div class="host-stats">
+        <span id="stat-participants" class="stat">0 participants</span>
+        <span id="stat-ratio" class="stat">scramble: —</span>
+      </div>
+      <div id="host-message-preview" class="host-message-preview"></div>
+      <canvas id="position-map" class="position-map" width="300" height="300"></canvas>
+      <p class="map-label">reported positions (Wi-Fi triangulation)</p>
+    </div>
+  </div>
+
+  <!-- PARTICIPANT VIEW: the message -->
+  <div id="view-participant" class="view">
+    <div id="participant-message" class="participant-message"></div>
+    <div id="geo-status" class="geo-status"></div>
+    <div id="accuracy-display" class="accuracy-display"></div>
+  </div>
+
+  <!-- SESSION ENDED -->
+  <div id="view-ended" class="view">
+    <div class="ended-inner">
+      <p class="ended-text">SESSION ENDED</p>
+      <p class="ended-sub">the host has left</p>
+      <button onclick="location.reload()" class="role-btn">RESTART</button>
+    </div>
+  </div>
+
+  <!-- ERROR VIEW -->
+  <div id="view-error" class="view">
+    <div class="ended-inner">
+      <p class="ended-text" id="error-text">ERROR</p>
+      <button onclick="location.reload()" class="role-btn">BACK</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
