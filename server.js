@@ -163,7 +163,7 @@ function broadcast() {
     note,
   });
 
-  // Emit position map to host only (relative to host position, in meters)
+  // Emit position map to everyone (relative to host position, in meters)
   if (clients[host] && host) {
     const idOrder = sortedParticipantIds();
     const relativePositions = Object.entries(clients)
@@ -178,7 +178,7 @@ function broadcast() {
         return { dx, dy, accuracy: c.accuracy, colorIndex };
       });
 
-    io.to(host).emit('position_map', {
+    io.emit('position_map', {
       participants: relativePositions,
       ratio,
     });

@@ -66,7 +66,7 @@ socket.on('your_marker', ({ colorIndex }) => {
   const label = document.getElementById('participant-color-label');
   const row = document.getElementById('participant-marker-row');
   if (swatch) swatch.style.background = markerHsl(colorIndex);
-  if (label) label.textContent = 'your dot on the host map';
+  if (label) label.textContent = 'your dot on the map';
   if (row) row.hidden = false;
 });
 
@@ -213,78 +213,81 @@ socket.on('position_map', ({ participants, ratio }) => {
 });
 
 function drawMap(participants, ratio) {
-  const canvas = document.getElementById('position-map');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const H = canvas.height;
-  const cx = W / 2;
-  const cy = H / 2;
+  const canvases = document.querySelectorAll('.position-map');
+  if (!canvases.length) return;
 
-  ctx.clearRect(0, 0, W, H);
+  canvases.forEach((canvas) => {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    const cx = W / 2;
+    const cy = H / 2;
 
-  // Background
-  ctx.fillStyle = '#0f0f0f';
-  ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);
 
-  // Grid lines
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 1;
-  for (let x = 0; x <= W; x += 30) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y <= H; y += 30) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
+    // Background
+    ctx.fillStyle = '#0f0f0f';
+    ctx.fillRect(0, 0, W, H);
 
-  if (participants.length === 0) {
-    ctx.fillStyle = '#333';
-    ctx.font = '11px Space Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('no participants yet', cx, cy);
-  } else {
-    // Scale to fit all points
-    const xs = participants.map((p) => p.dx);
-    const ys = participants.map((p) => p.dy);
-    const maxR = Math.max(
-      10,
-      ...xs.map(Math.abs),
-      ...ys.map(Math.abs)
-    );
-    const scale = (cx * 0.8) / maxR;
+    // Grid lines
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= W; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y <= H; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
 
-    // Draw participant dots (colorIndex matches participant swatches)
-    participants.forEach((p, i) => {
-      const sx = cx + p.dx * scale;
-      const sy = cy - p.dy * scale; // flip y (screen coords)
-      const ci = p.colorIndex != null ? p.colorIndex : i;
+    if (participants.length === 0) {
+      ctx.fillStyle = '#333';
+      ctx.font = '11px Space Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('no participants yet', cx, cy);
+    } else {
+      // Scale to fit all points
+      const xs = participants.map((p) => p.dx);
+      const ys = participants.map((p) => p.dy);
+      const maxR = Math.max(
+        10,
+        ...xs.map(Math.abs),
+        ...ys.map(Math.abs)
+      );
+      const scale = (cx * 0.8) / maxR;
 
-      // Accuracy circle (faint)
-      if (p.accuracy && p.accuracy * scale > 4) {
+      // Draw participant dots (colorIndex matches participant swatches)
+      participants.forEach((p, i) => {
+        const sx = cx + p.dx * scale;
+        const sy = cy - p.dy * scale; // flip y (screen coords)
+        const ci = p.colorIndex != null ? p.colorIndex : i;
+
+        // Accuracy circle (faint)
+        if (p.accuracy && p.accuracy * scale > 4) {
+          ctx.beginPath();
+          ctx.arc(sx, sy, p.accuracy * scale, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0,170,255,0.12)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Dot
         ctx.beginPath();
-        ctx.arc(sx, sy, p.accuracy * scale, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0,170,255,0.12)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+        ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = markerHsl(ci);
+        ctx.fill();
+      });
+    }
 
-      // Dot
-      ctx.beginPath();
-      ctx.arc(sx, sy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = markerHsl(ci);
-      ctx.fill();
-    });
-  }
-
-  // Host dot (center)
-  ctx.beginPath();
-  ctx.arc(cx, cy, 7, 0, Math.PI * 2);
-  ctx.fillStyle = '#a6ff00';
-  ctx.fill();
-  ctx.font = '9px Space Mono, monospace';
-  ctx.fillStyle = '#a6ff00';
-  ctx.textAlign = 'center';
-  ctx.fillText('HOST', cx, cy + 18);
+    // Host dot (center)
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#a6ff00';
+    ctx.fill();
+    ctx.font = '9px Space Mono, monospace';
+    ctx.fillStyle = '#a6ff00';
+    ctx.textAlign = 'center';
+    ctx.fillText('HOST', cx, cy + 18);
+  });
 }
 
 // ── UTILS ────────────────────────────────────────────────────────
