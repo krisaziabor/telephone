@@ -107,7 +107,7 @@ function onGeoSuccess(pos) {
     if (accEl) accEl.textContent = `accuracy: ±${Math.round(accuracy)}m`;
 
     const statusEl = document.getElementById('geo-status');
-    if (statusEl) statusEl.textContent = 'location active — Wi-Fi triangulation';
+    if (statusEl) statusEl.textContent = 'location active';
   }
 }
 
